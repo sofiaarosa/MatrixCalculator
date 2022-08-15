@@ -31,7 +31,7 @@
 	int selectRow(int matrix[maxSize][maxSize]);
 	int selectColumn(int matrix[maxSize][maxSize]);
 	void printHeader();
-	void fillMatrix(int matrix[maxSize][maxSize]);
+	int fillMatrix(int matrix[maxSize][maxSize]);
 	void readMatrix(int matrix[maxSize][maxSize]);
 	void generateMatrix(int matrix[maxSize][maxSize]);
 	void showMatrix(int matrix[maxSize][maxSize], char *);
@@ -39,7 +39,10 @@
 	void showHighlightedColumn(int matrix[maxSize][maxSize], int);
 	void menuExecute(int matrix[maxSize][maxSize], int);
 	void swapRows(int matrix[maxSize][maxSize]);
-//	void swapColumns(int matrix[maxSize][maxSize], int, int);
+	void swapColumns(int matrix[maxSize][maxSize]);
+	void swapDiagonals(int matrix[maxSize][maxSize]);
+	void isSimetric(int matrix[maxSize][maxSize]);
+	void isMagic(int matrix[maxSize][maxSize]);
 	
 	//global variables
 	int rows, columns;
@@ -82,12 +85,11 @@
 			}while(rows <= 0 || rows > maxSize);
 		    gotoxy(1,3);printf("                                                                        ");
 		    
-		    fillMatrix(matrix);
-		    
-		    do{
+		    choice = fillMatrix(matrix);
+		    while(choice >= 0){
 		    	choice = mainMenu(matrix);
 		    	menuExecute(matrix, choice);
-			}while(choice >= 0);
+			}
 		    
 			out = reprocessing();	
 		}while(out != 2); 
@@ -144,6 +146,16 @@
 		}
 	}
 	
+	void swapDiagonals(int matrix[maxSize][maxSize]){
+		int x, y, i, j;
+		for(i=0, j=rows-1;i<rows;i++, j--){
+			x = matrix[i][i];
+			y = matrix[i][j];
+			matrix[i][i] = y;
+			matrix[i][j] = x;
+		}
+	}
+	
 	void menuExecute(int matrix[maxSize][maxSize], int choice){
 		int x, y;
 		switch(choice){
@@ -152,6 +164,15 @@
 				break;
 			case 2:
 				swapColumns(matrix);
+				break;
+			case 3:
+				swapDiagonals(matrix);
+				break;
+			case 4:
+				isSimetric(matrix);
+				break;
+			case 5:
+				isMagic(matrix);
 				break;
 		}	
 	}
@@ -351,7 +372,7 @@
 				matrix[i][j]=rand()%10;
 	}
 	
-	void fillMatrix(int matrix[maxSize][maxSize]){
+	int fillMatrix(int matrix[maxSize][maxSize]){
 		printHeader();
 		gotoxy(3,3);printf("Modo de preenchimento da matriz: ");
 		gotoxy(3,5);printf("Entrada pelo teclado");
@@ -363,7 +384,10 @@
 	    	case 2:
 	    		generateMatrix(matrix);
 	    		break;
+	    	case -1:
+	    		return -1;
 		}
+		return 0;
 	}
 	
 	int menuSelection(int rowMin, int rowMax){
@@ -406,6 +430,70 @@
 		else return 0; //no, isn't square
 	}
 	
+	void isSimetric(int matrix[maxSize][maxSize]) {	
+		int flag = 0, r, c;
+		for (r = 0; r < rows; r++) {
+			for (c = 0; c < columns; c++) {
+				if (matrix[r][c] != matrix[c][r]) {
+					flag++;
+					break;
+				}
+			}
+			if (flag > 0) break;
+		}
+		
+		showMatrix(matrix, "A matriz: ");
+		gotoxy(3, 10 + rows);
+		if(flag > 0)printf("Não é simétrica");
+		else printf("É simétrica");
+		gotoxy(3, 11 + rows);
+		textcolor(4); 
+		printf("Pressione qualquer tecla para continuar");
+		textcolor(0); 
+		getch();
+	}
+	
+	void isMagic(int matrix[maxSize][maxSize]) {
+		int sum = 0, sum2 = 0, lastSum, aux, i, j, k, flag = 0;
+		for (i = 0; i < rows; i++) {
+			for (j = 0, sum = 0; j < columns; j++) {
+				sum += matrix[i][j];		
+			}	
+			if (i > 0 && lastSum != sum) {
+				flag++;
+				break;
+			}
+			lastSum = sum;		
+		}
+		for (i = 0; i < rows; i++) {
+			for (j = 0, sum = 0; j < columns; j++) {
+				sum += matrix[j][i];		
+			}	
+			if (i > 0 && lastSum != sum) {
+				flag++;
+				break;
+			}
+			lastSum = sum;		
+		}
+		for (i = 0, j = rows - 1, sum  = 0, sum2 = 0; i < rows; i++, j--) {
+			sum += matrix[i][i];
+			sum2 +=	matrix[i][j];	
+		}		
+		if (sum != sum2) {
+			flag++;
+		}
+		
+		showMatrix(matrix, "A matriz: ");
+		gotoxy(3, 10 + rows);
+		if(flag > 0)printf("Não é quadrado mágico");
+		else printf("É quadrado mágico");
+		gotoxy(3, 11 + rows);
+		textcolor(4); 
+		printf("Pressione qualquer tecla para continuar");
+		textcolor(0); 
+		getch();
+	}
+	
 	int mainMenu(int matrix[maxSize][maxSize]){
 		printHeader();
 		showMatrix(matrix, "Matriz obtida: ");
@@ -413,10 +501,10 @@
 		gotoxy(3,++x); printf("Selecione a operação a ser realizada com a matriz (pressione ESC para sair): ");
 	    gotoxy(3,++x); printf("Trocar linhas");
 	    gotoxy(3,++x); printf("Trocar colunas");
-	    gotoxy(3,++x); printf("Verificar se é simétrica");
 	    y = x; 
 		if(!isSquare())textcolor(8); 
 	    gotoxy(3,++x); printf("Trocar diagonais");
+	    gotoxy(3,++x); printf("Verificar se é simétrica");
 	    gotoxy(3,++x); printf("Verificar se é quadrado mágico");
 	    gotoxy(3,++x); printf("Verificar se é quadrado latino");
 	    gotoxy(3,++x); printf("Verificar se é matriz de permutação");
